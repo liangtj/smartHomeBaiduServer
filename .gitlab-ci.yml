@@ -24,23 +24,23 @@ format:
     stage: test
     script:
       - declare -a services=("directive-resolver")
-      - (for i in "${arr[@]}"; do \
+      - for i in "${arr[@]}"; do \
             cd "${i}"; \
             go fmt $(go list ./... | grep -v /vendor/); \
             go vet $(go list ./... | grep -v /vendor/); \
             go test -race $(go list ./... | grep -v /vendor/); \
             cd ..; \
-        done);
+        done
 
 compile:
     stage: build
     script:
       - declare -a services=("directive-resolver")
-      - (for i in "${arr[@]}"; do \
+      - for i in "${arr[@]}"; do \
             cd "${i}"; \
             go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/mybinary; \
             cd ..; \
-        done);
+        done
     artifacts:
       paths:
         - mybinary
