@@ -2,6 +2,7 @@ package util
 
 import (
 	"log"
+	"smarthome/util"
 )
 
 func init() {
@@ -14,4 +15,8 @@ var (
 
 // Log  = func(args ...interface{}) {}
 // Logf = func(args ...interface{}) {}
+)
+
+var (
+	PanicIf = util.PanicIf
 )
