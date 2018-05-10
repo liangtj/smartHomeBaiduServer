@@ -15,3 +15,5 @@
 > API Key: MGPHeIAcmHaDqB2uEpOeNP2U
 >
 > Secret Key: zjKl72Vq7pvEOGpEPs6WUHbkNvjCC5aR
+
+[API文档](https://smarthomebaidu.docs.apiary.io)
