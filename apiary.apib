@@ -66,30 +66,10 @@ Code | msg      |
             "msg": "Unauthorized",
             "data": null
         }
-        
-## User [/users/{username}]
 
-> 智能家居头像暂时用微信头像绑定，因此注册时候不需要提交头像（下同） ,后期再作进一步打算
+## Register [/users]
 
-### Retrieve User Info [GET]
-
-+ Response 200 (application/json)
-
-        {
-            "msg": "OK",
-            "data": {
-                "username":"user",
-                "homeAssitantIP": "172.16.19.204"
-                
-            }
-        }
-
-+ Response 403 (application/json)
-
-        {
-            "msg": "Forbidden",
-            "data": null
-        }
+> 智能家居头像暂时用微信头像绑定,后期再作进一步打算
 
 ### Register New User [POST]
 
@@ -115,6 +95,28 @@ Code | msg      |
 
         {
             "msg": "Conflict",
+            "data": null
+        }
+
+## User [/users/{username}]
+
+### Retrieve User Info [GET]
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "username":"user",
+                "homeAssitantIP": "172.16.19.204"
+                
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
             "data": null
         }
 
@@ -175,8 +177,6 @@ Code | msg      |
             "msg": "Forbidden",
             "data": null
         }
-        
-
 
 ## isNewUser [/isNewUser]
 
@@ -204,13 +204,11 @@ Code | msg      |
             "msg": "Forbidden",
             "data": null
         }
-
-
-
+        
 
 ## Device [/devices/{entity_id}]
 
-### Retrieve Device Info [GET]
+### Retrieve a Device Info [GET]
 
 + Response 200 (application/json)
 
@@ -233,18 +231,14 @@ Code | msg      |
             "data": null
         }
 
-
-
-
-### Modify Device Info [PATCH]
+### Modify a Device Info [PATCH]
 
 + Request (application/json)
 
         {
-            "attributes": {
-                "friendly_name": "Weather Temperature",
-                "unit_of_measurement": "\u00b0C"
-            },
+            
+            "friendly_name": "Weather Temperature",
+            "unit_of_measurement": "\u00b0C",       
             "state": "-1.9"
         }
 
@@ -269,10 +263,32 @@ Code | msg      |
             "data": null
         }
 
+### Delete a Device [DELETE]
 
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": null
+        }
+
++ Response 401 (application/json)
+
+        {
+            "msg": "Unauthorized",
+            "data": null
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+      
 ## DeviceList [/devices]
 
-### get Devices Info [GET]
+### Get use Device List [GET]
 
 + Response 200 (application/json)
 
@@ -300,11 +316,11 @@ Code | msg      |
             "msg": "Forbidden",
             "data": null
         }
+  
 
+## HomeAssitant [/homeAssitant]
 
-## homeAssitant [/homeAssitant]
-
-### get homeAssitant Info [GET]
+### Get HomeAssitant Info [GET]
 
 + Response 200 (application/json)
 
@@ -329,3 +345,156 @@ Code | msg      |
             "data": null
         }
 
+
+## scene [/scenes/{entity_id}]
+
+### Get Scene Info [GET]
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "entity_id": "group.living_room",
+                "friendly_name": "living room",
+                "state": "on",
+                "devices": [
+                    {
+                        "attributes": {},
+                        "entity_id": "sun.sun",
+                        "state": "below_horizon"
+                    },
+                    {
+                        "attributes": {},
+                        "entity_id": "process.Dropbox",
+                        "state": "on"
+                    }
+                ]
+            }
+        }
+
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+
+### Modify Scene Info/Status [PATCH]
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "entity_id": "group.living_room",
+                "friendly_name": "living room",
+                "state": "on",
+                "devices": [
+                    {
+                        "attributes": {},
+                        "entity_id": "sun.sun",
+                        "state": "below_horizon"
+                    },
+                    {
+                        "attributes": {},
+                        "entity_id": "process.Dropbox",
+                        "state": "on"
+                    }
+                ]
+            }
+        }
+
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+## scenes [/scenes]
+
+### Get Scenes List [GET]
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "rooms": [
+                    {
+                        "entity_id": "group.living_room",
+                        "friendly_name": "living room",
+                        "state": "on",
+                        "devices": [
+                            {
+                                "attributes": {},
+                                "entity_id": "sun.sun",
+                                "state": "below_horizon"
+                            },
+                            {
+                                "attributes": {},
+                                "entity_id": "process.Dropbox",
+                                "state": "on"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+### Add New Scene [POST]
+
++ Request (application/json)
+
+        {
+            
+            "friendly_name": "living room",
+            "state": "on",
+            "devices": [
+                {
+                    "attributes": {},
+                    "entity_id": "sun.sun",
+                    "state": "below_horizon"
+                },
+                {
+                    "attributes": {},
+                    "entity_id": "process.Dropbox",
+                    "state": "on"
+                }
+            ]
+        }
+
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "entity_id": "group.living_room",
+                "friendly_name": "living room",
+                "state": "on",
+                "devices": [
+                    {
+                        "attributes": {},
+                        "entity_id": "sun.sun",
+                        "state": "below_horizon"
+                    },
+                    {
+                        "attributes": {},
+                        "entity_id": "process.Dropbox",
+                        "state": "on"
+                    }
+                ]
+            }
+        }
