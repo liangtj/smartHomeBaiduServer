@@ -1,0 +1,331 @@
+FORMAT: 1A
+HOST: http://polls.apiblueprint.org/
+
+# smartHomeBaidu
+
+smartHomeBaidu Mock Server API
+
+> 使用cookies来标识用户，
+
+Response Code and msg:
+Code | msg      |
+---- | -------  | 
+200  | OK            | 
+401  | Unauthorized  |
+403  | Forbidden     |
+409  | Conflict      |
+
+
+## Login [/login]
+
+### Login [POST]
+
++ Request (application/json)
+
+        {
+            "username":"user",
+            "password":"pass",
+        }
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "username": "user"
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+## Logout [/logout]
+
+### Logout [POST]
+
++ Request (application/json)
+
+        {
+            "username": "user",
+        }
+
++ Response 200 (application/json)
+
+        {
+            "msg":"OK",
+            "data": null
+        }
+
++ Response 401 (application/json)
+
+        {
+            "msg": "Unauthorized",
+            "data": null
+        }
+        
+## User [/users/{username}]
+
+> 智能家居头像暂时用微信头像绑定，因此注册时候不需要提交头像（下同） ,后期再作进一步打算
+
+### Retrieve User Info [GET]
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "username":"user",
+                "homeAssitantIP": "172.16.19.204"
+                
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+### Register New User [POST]
+
++ Request (application/json)
+
+        {
+            "username": "user",
+            "password": "pass",
+            "homeAssitantIP": "172.16.19.204"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "msg":"OK",
+            "data": {
+                "username": "user",
+                "homeAssitantIP": "172.16.19.204"
+            }
+        }
+
++ Response 409 (application/json)
+
+        {
+            "msg": "Conflict",
+            "data": null
+        }
+
+
+### Modify User Info [PATCH]
+
++ Request (application/json)
+
+        {
+            "username":"user",
+            "newPassword": "newPass",
+            
+        }
+
++ Response 200 (application/json)
+
+        {
+            "msg":"OK",
+            "data": {
+                "username":"user",
+                "password": "newPass",
+               
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+### Delete a user [DELETE]
+
++ Request (application/json)
+
+        {
+            "password": "pass"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": null
+        }
+
++ Response 401 (application/json)
+
+        {
+            "msg": "Unauthorized",
+            "data": null
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+        
+
+
+## isNewUser [/isNewUser]
+
+### judge whether is a new user  [POST]
+
++ Request (application/json)
+
+        {
+            "username":"user",
+            "password":"pass",
+        }
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "username": "user"
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+
+
+
+## Device [/devices/{entity_id}]
+
+### Retrieve Device Info [GET]
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "attributes": {
+                    "friendly_name": "Weather Temperature",
+                    "unit_of_measurement": "\u00b0C"
+                },
+                "entity_id": "sensor.weather_temperature",
+                "state": "-3.9"
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+
+
+
+### Modify Device Info [PATCH]
+
++ Request (application/json)
+
+        {
+            "attributes": {
+                "friendly_name": "Weather Temperature",
+                "unit_of_measurement": "\u00b0C"
+            },
+            "state": "-1.9"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "msg":"OK",
+            "data": {
+                "attributes": {
+                    "friendly_name": "Weather Temperature",
+                    "unit_of_measurement": "\u00b0C"
+                },
+                "entity_id": "sensor.weather_temperature",
+                "state": "-3.9"
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+
+## DeviceList [/devices]
+
+### get Devices Info [GET]
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "deviceList": [
+                    {
+                        "attributes": {},
+                        "entity_id": "sun.sun",
+                        "state": "below_horizon"
+                    },
+                    {
+                        "attributes": {},
+                        "entity_id": "process.Dropbox",
+                        "state": "on"
+                    }
+                ]
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
+
+## homeAssitant [/homeAssitant]
+
+### get homeAssitant Info [GET]
+
++ Response 200 (application/json)
+
+        {
+            "msg": "OK",
+            "data": {
+                "elevation":510,
+                "latitude":45.8781529,
+                "longitude":8.458853651,
+                "weather": {
+                    "humidity": "55.8%",
+                    "temperature": "25.7",
+                    "state": "sun"
+                }
+            }
+        }
+
++ Response 403 (application/json)
+
+        {
+            "msg": "Forbidden",
+            "data": null
+        }
+
