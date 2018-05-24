@@ -37,12 +37,12 @@ func (u *User) Registered() bool {
 	if u == nil {
 		return false
 	}
-	return GetAllUsersRegistered().Contains(u.Name)
+	return GetAllUsersRegistered().Contains(u.ID)
 }
 
 func (u *User) involvedMeetings() *MeetingList {
 	return GetAllMeetings().Filter(func(m Meeting) bool {
-		return m.SponsoredBy(u.Name) || m.ContainsParticipator(u.Name)
+		return m.SponsoredBy(u.ID) || m.ContainsParticipator(u.ID)
 	})
 }
 
@@ -77,7 +77,7 @@ func (u *User) QueryAccountAll() []UserInfoPublic {
 	// NOTE: whatever, temporarily ignore the problem that the actor of query is Nil
 	username := Username("Anonymous")
 	if u != nil {
-		username = u.Name
+		username = u.ID
 	}
 	ret := GetAllUsersRegistered().PublicInfos()
 	log.Printf("User %v queries all accounts.\n", username)
@@ -89,7 +89,7 @@ func (u *User) CancelAccount() error {
 	if u == nil {
 		return homererror.ErrNilUser
 	}
-	log.Printf("User %v canceled account.\n", u.Name)
+	log.Printf("User %v canceled account.\n", u.ID)
 	return nil
 }
 
@@ -100,7 +100,7 @@ func (u *User) SponsorMeeting(info MeetingInfo) (*Meeting, error) {
 	}
 	m := NewMeeting(info)
 	err := GetAllMeetings().Add(m)
-	log.Printf("User %v sponsors meeting %v.\n", u.Name, info)
+	log.Printf("User %v sponsors meeting %v.\n", u.ID, info)
 	return m, err
 }
 
@@ -111,7 +111,7 @@ func (u *User) AddParticipatorToMeeting(meeting *Meeting, user *User) error {
 	}
 
 	err := meeting.Involve(user)
-	log.Printf("User %v adds participator %v into Meeting %v.\n", u.Name, user.Name, meeting.Title)
+	log.Printf("User %v adds participator %v into Meeting %v.\n", u.ID, user.ID, meeting.Title)
 	return err
 }
 
@@ -121,7 +121,7 @@ func (u *User) RemoveParticipatorFromMeeting(meeting *Meeting, user *User) error
 		return homererror.ErrNilUser
 	}
 	err := meeting.Exclude(user)
-	log.Printf("User %v removes participator %v from Meeting %v.\n", u.Name, user.Name, meeting.Title)
+	log.Printf("User %v removes participator %v from Meeting %v.\n", u.ID, user.ID, meeting.Title)
 	return err
 }
 
@@ -131,7 +131,7 @@ func (u *User) LogOut() error {
 		return homererror.ErrNilUser
 	}
 
-	log.Printf("User %v logs out.\n", u.Name)
+	log.Printf("User %v logs out.\n", u.ID)
 	return nil
 }
 
@@ -139,7 +139,7 @@ func (u *User) QueryMeetingByInterval(start, end time.Time) MeetingInfoListPrint
 	// NOTE: FIXME: whatever, temporarily ignore the problem that the actor of query is Nil
 	username := Username("Anonymous")
 	if u != nil {
-		username = u.Name
+		username = u.ID
 	}
 	ret := u.involvedMeetings().Textualize()
 	log.Printf("User %v queries meetings in time interval %v ~ %v.\n", username, start, end)
@@ -158,7 +158,7 @@ func (u *User) CancelMeeting(meeting *Meeting) error {
 	}
 
 	err := meeting.Dissolve()
-	log.Printf("User %v cancels Meeting %v.\n", u.Name, meeting.Title)
+	log.Printf("User %v cancels Meeting %v.\n", u.ID, meeting.Title)
 	return err
 }
 
@@ -169,6 +169,6 @@ func (u *User) QuitMeeting(meeting *Meeting) error {
 	}
 
 	err := meeting.Exclude(u)
-	log.Printf("User %v quits Meeting %v.\n", u.Name, meeting.Title)
+	log.Printf("User %v quits Meeting %v.\n", u.ID, meeting.Title)
 	return err
 }

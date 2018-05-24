@@ -47,7 +47,7 @@ func (m *Meeting) SponsoredBy(name Username) bool {
 		log.Warningln("m.SponsoredBy(name) where m.Sponsor == nil.\n")
 		return false
 	}
-	return m.Sponsor.Name == name
+	return m.Sponsor.ID == name
 }
 
 // ContainsParticipator checks if Meeting's participators contains the User
@@ -88,7 +88,7 @@ func (m *Meeting) Exclude(u *User) error {
 	if m.Participators.Size() <= 0 {
 		return m.Dissolve()
 	}
-	log.Printf("User %v is excluded from Meeting %v.\n", u.Name, m.Title)
+	log.Printf("User %v is excluded from Meeting %v.\n", u.ID, m.Title)
 	return nil
 }
 
@@ -105,6 +105,6 @@ func (m *Meeting) Involve(u *User) error {
 		log.Print(err)
 		return err
 	}
-	log.Printf("User %v is involved in Meeting %v.\n", u.Name, m.Title)
+	log.Printf("User %v is involved in Meeting %v.\n", u.ID, m.Title)
 	return nil
 }

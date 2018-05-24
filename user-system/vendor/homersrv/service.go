@@ -2,6 +2,7 @@ package homersrv
 
 import (
 	"bytes"
+	"config"
 	errors "convention/homererror"
 	"encoding/json"
 	"entity"
@@ -15,7 +16,6 @@ import (
 	log "util/logger"
 
 	"github.com/gin-gonic/gin"
-	muxx "github.com/gorilla/mux"
 
 	// "github.com/gin-contrib/sessions"
 	// "github.com/gin-contrib/sessions/cookie"
@@ -23,14 +23,15 @@ import (
 )
 
 var (
-	secret = []byte("something-very-secret")
+	storeFilepath = config.WorkingDir() + "session-store.json"
+	secret        = []byte("something-very-secret")
 	// SessionStore = cookie.NewStore(key)
-	SessionStore = sessions.NewCookieStore(secret)
+	SessionStore = sessions.NewFilesystemStore(storeFilepath, secret)
 	sessionName  = "homer-user"
 )
 
 type Username = entity.Username
-type Auth = entity.Auth
+type Auth = entity.Secret
 
 // type UserInfo = entity.UserInfoRaw
 type UserInfoRaw struct {
@@ -55,9 +56,9 @@ type MeetingTitle = entity.MeetingTitle
 func MakeUserInfo(username Username, password Auth, email, phone string) entity.UserInfo {
 	info := entity.UserInfo{}
 
-	info.Name = username
-	info.Auth = password
-	info.Mail = email
+	info.ID = username
+	info.Secret = password
+	info.HomeAssistantAddr = email
 	info.Phone = phone
 
 	return info
@@ -152,7 +153,7 @@ var logInHandler = func(w http.ResponseWriter, r *http.Request) {
 		RespondJSON(w, http.StatusCreated, res)
 	}
 } */
-var logOutHandler = func(w http.ResponseWriter, r *http.Request) {
+/* var logOutHandler = func(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(r.Method != "DELETE")
 
 	var rInfo RequestJSON
@@ -257,7 +258,7 @@ var registerUserHandler = func(w http.ResponseWriter, r *http.Request) {
 
 	res := ResponseUserInfoPublic(uInfo.UserInfoPublic)
 	RespondJSON(w, http.StatusCreated, res)
-}
+} */
 
 func init() {
 	// TODEL: after gin
@@ -284,16 +285,6 @@ func init() {
 	router.GET(api+"/users/", gin.WrapF(getUsersHandler))
 	// router.POST(api+"/users/", gin.WrapF(registerUserHandler))
 
-	/* 	// Group Meeting
-		router.GET(api+"/meetings/{identifier}", gin.WrapF(getMeetingByIDHandler))
-		router.DELETE(api+"/meetings/{identifier}", gin.WrapF(deleteMeetingByIDHandler))
-		router.PATCH(api+"/meetings/{identifier}", gin.WrapF(modifyMeetingByIDHandler))
-
-		// Group Meetings
-		router.GET(api+"/meetings/", gin.WrapF(getMeetingByIntervalHandler))
-	    router.POST(api+"/meetings/", gin.WrapF(sponsorMeetingHandler))
-	*/
-
 	// ...
 	router.GET("/api/test", gin.WrapF(apiTestHandler()))
 	router.GET("/unknown/", gin.WrapF(sayDeveloping))
@@ -312,14 +303,16 @@ func init() {
 	router.POST(api+"/register", register) // TODEL:
 	router.POST(api+"/users", register)
 
-	router.GET(api+"/users/:identifier", func(c *gin.Context) {
-		identifier := c.Param("identifier")
-		retrieveUserInfoByName(c, Username(identifier))
-	})
-	router.PATCH(api+"/users/:identifier", func(c *gin.Context) {
-		identifier := c.Param("identifier")
-		modifyUserInfoByName(c, Username(identifier)) // TODO: AuthRequired
-	})
+	/* router.GET(api+"/users/:identifier", func(c *gin.Context) {
+			identifier := c.Param("identifier")
+			retrieveUserInfoByName(c, Username(identifier))
+		})
+		router.PATCH(api+"/users/:identifier", func(c *gin.Context) {
+			identifier := c.Param("identifier")
+			modifyUserInfoByName(c, Username(identifier)) // TODO: AuthRequired
+	    }) */
+	router.GET(api+"/userInfo", retrieveUserInfo)
+	router.PATCH(api+"/userInfo", modifyUserInfo) // TODO: AuthRequired
 	router.DELETE(api+"/users/:identifier", func(c *gin.Context) {
 		identifier := c.Param("identifier")
 		deleteUserByName(c, Username(identifier)) // TODO: AuthRequired
@@ -382,8 +375,7 @@ var register = func(c *gin.Context) {
 // var login = logInHandler
 var login = func(c *gin.Context) {
 	var uInfoRaw struct {
-		UserID       string `json:"username"`
-		UserPassword string `json:"password"`
+		Code string `json:"code"`
 	}
 
 	if err := c.ShouldBind(&uInfoRaw); err != nil {
@@ -392,28 +384,38 @@ var login = func(c *gin.Context) {
 		return
 	}
 
-	userid := Username(uInfoRaw.UserID)
-	uInfo, err := QueryAccountByUsername(userid)
-	if err != nil {
-		c.AbortWithError(StatusCodeCorrespondingToAgendaError[err], err)
-		return
-	}
+	wxResp, err := WxLoginTokenAuth(uInfoRaw.Code)
 
-	// LogIn(userid, authTrial)
-	authTrial := Auth(uInfoRaw.UserPassword)
-	if !uInfo.Auth.Verify(authTrial) {
+	if err != nil {
 		err := errors.ErrFailedAuth
 		c.AbortWithError(StatusCodeCorrespondingToAgendaError[err], err)
 	} else {
-		sess, _ := SessionStore.Get(c.Request, sessionName)
+
+		// if need, use whatever a session-mgr ...
+
+		u := c.Request.URL.String()
+		req, err := http.NewRequest("GET", u, nil)
+		if err != nil {
+			internalError(c)
+			return
+		}
+		// context.Set(req, registryKey, ...)
+
+		sessToken3rd := "...3rd_session..."
+		req.Header.Set("Wx-3rd-Session-Token", sessToken3rd)
+
+		sess, _ := SessionStore.Get(req, sessionName)
 
 		sess.Values[42] = rand.Uint32()
+		sess.Values["3rd_session"] = sessToken3rd
+		sess.Values["Wx-Open-ID"] = wxResp.OpenID
+		sess.Values["Wx-Session-Key"] = wxResp.SessionKey
 
 		maxAge := 10 * time.Minute
 		sess.Options.MaxAge = int(maxAge)
 
 		sess.Values["authenticated"] = true
-		if err := sess.Save(c.Request, c.Writer); err != nil {
+		if err := sess.Save(req /* c.Request */, c.Writer); err != nil {
 			internalError(c)
 			return
 		}
@@ -424,7 +426,7 @@ var login = func(c *gin.Context) {
 		}{
 			Msg: "OK",
 			Data: Object{
-				"username": userid,
+				"3rd_session": sess.Values["3rd_session"],
 			},
 		}
 		c.JSON(200 /* http.StatusCreated */, res)
@@ -462,7 +464,7 @@ var logout = func(c *gin.Context) {
 
 }
 
-// FIXME: AuthRequired ?
+/* // FIXME: AuthRequired ?
 var retrieveUserInfoByName = func(c *gin.Context, username Username) {
 	uInfo, err := QueryAccountByUsername(username)
 	if err != nil {
@@ -473,8 +475,8 @@ var retrieveUserInfoByName = func(c *gin.Context, username Username) {
 	res := ResponseBody{
 		Msg: "OK",
 		Data: Object{
-			"username":       username.String(),
-			"homeAssitantIP": uInfo.HomeAssitantAddr,
+			"username":        username.String(),
+			"homeAssistantIP": uInfo.HomeAssistantAddr,
 		},
 	}
 	c.JSON(200, res)
@@ -501,32 +503,70 @@ var modifyUserInfoByName = func(c *gin.Context, username Username) {
 		},
 	}
 	c.JSON(200, res)
-}
-var deleteUserByName = func(c *gin.Context, username Username) {
-	var uInfoRaw struct {
-		UserPassword string `json:"password"`
+} */
+var retrieveUserInfo = func(c *gin.Context) {
+	sess, err := SessionStore.Get(c.Request, sessionName)
+	if err != nil {
+		internalError(c)
 	}
+
+	id := sess.Values["Wx-Open-ID"].(Username)
+	uInfo, err := QueryAccountByUsername(id)
+	if err != nil {
+		c.AbortWithError(StatusCodeCorrespondingToAgendaError[err], err)
+		return
+	}
+
+	res := ResponseBody{
+		Msg: "OK",
+		Data: Object{
+			"homeAssistantIP": uInfo.HomeAssistantAddr,
+		},
+	}
+	c.JSON(200, res)
+}
+var modifyUserInfo = func(c *gin.Context) {
+	var uInfoRaw struct {
+		HomeAssistantAddr string `json:"homeAssistantIP"`
+	}
+
 	if err := c.ShouldBind(&uInfoRaw); err != nil {
 		// NOTE: maybe should not expose `err` ?
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	uInfo, err := QueryAccountByUsername(username)
+	sess, err := SessionStore.Get(c.Request, sessionName)
+	if err != nil {
+		internalError(c)
+	}
+
+	id := sess.Values["Wx-Open-ID"].(Username)
+	uInfo, err := QueryAccountByUsername(id)
 	if err != nil {
 		c.AbortWithError(StatusCodeCorrespondingToAgendaError[err], err)
 		return
 	}
 
-	// TODO: validate && delete !
-
-	res := ResponseBody{
-		Msg:  "OK",
-		Data: nil,
+	// TODO: modify !
+	uInfo.HomeAssistantAddr = uInfoRaw.HomeAssistantAddr
+	if err := model.UserInfoService.Save(&uInfo); err != nil {
+		res := ResponseBody{
+			Msg:  "Forbidden",
+			Data: nil,
+		}
+		log.Error(err)
+		c.JSON(403, res)
+	} else {
+		res := ResponseBody{
+			Msg: "OK",
+			Data: Object{
+				"homeAssistantAddr": uInfo.HomeAssistantAddr,
+			},
+		}
+		c.JSON(200, res)
 	}
-	c.JSON(200, res)
 }
-
 var isNewUserGet = func(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(r.Method != "GET")
 

@@ -30,19 +30,19 @@ func (name Username) String() string {
 }
 
 type UserInfoPublic struct {
-	Name Username `gorm:"primary_key" json:"username"`
+	ID Username `gorm:"primary_key" json:"username"`
 
-	Mail  string `json:"mail"`
-	Phone string `json:"phone"`
+	HomeAssistantAddr string `json:"mail"`
+	Phone             string `json:"phone"`
 }
 
-type Auth = auth.Secret
+type Secret = auth.Secret
 
 // UserInfo represents the informations of a User
 type UserInfo struct {
 	UserInfoPublic
 
-	Auth Auth `gorm:"not NULL" json:"password"`
+	Secret Secret `gorm:"not NULL" json:"password"`
 }
 
 // UserInfoSerializable represents serializable UserInfo
@@ -125,7 +125,7 @@ func (ulSerial UserInfoSerializableList) Deserialize() *UserList {
 	ret := NewUserList()
 
 	for _, uInfo := range ulSerial {
-		if uInfo.Name.Empty() {
+		if uInfo.ID.Empty() {
 			log.Warning("A No-Name UserInfo is to be used. Just SKIP OVER it.")
 			continue
 		}
@@ -199,7 +199,7 @@ func LoadedUserList(decoder codec.Decoder) *UserList {
 func (ul *UserList) Identifiers() []Username {
 	ret := make([]Username, 0, ul.Size())
 	for _, u := range ul.PublicInfos() {
-		ret = append(ret, u.Name)
+		ret = append(ret, u.ID)
 	}
 	return ret
 }
@@ -245,7 +245,7 @@ func (ul *UserList) Add(user *User) error {
 	if user == nil {
 		return homererror.ErrNilUser
 	}
-	name := user.Name
+	name := user.ID
 	if ul.Contains(name) {
 		return homererror.ErrExistedUser
 	}
@@ -258,7 +258,7 @@ func (ul *UserList) Remove(user *User) error {
 	if user == nil {
 		return homererror.ErrNilUser
 	}
-	name := user.Name
+	name := user.ID
 	if ul.Contains(name) {
 		delete(ul.Users, name) // NOTE: never error, according to 'go-maps-in-action'
 		return nil

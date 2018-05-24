@@ -88,7 +88,7 @@ func (info *MeetingInfo) Serialize() *MeetingInfoSerializable {
 	mInfoSerial.Title = info.Title
 
 	if sponsor := info.Sponsor; sponsor != nil {
-		mInfoSerial.Sponsor = sponsor.Name
+		mInfoSerial.Sponsor = sponsor.ID
 	}
 
 	mInfoSerial.Participators = info.Participators.Identifiers()

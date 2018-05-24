@@ -79,7 +79,7 @@ func (*UserInfoAtomicService) FindByUsername(name entity.Username) (entity.UserI
 
 	// agendaDB.First(&uInfo, entity.UserInfoSerializable{Name: name}) // TODEL: sad to anonymous member ...
 	u := entity.UserInfoSerializable{}
-	u.Name = name
+	u.ID = name
 	err := userDB.First(&uInfo, u).Error
 	return uInfo, err
 }

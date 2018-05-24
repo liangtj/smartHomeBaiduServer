@@ -9,9 +9,9 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// RegisterUser ...
+/* // RegisterUser ...
 func RegisterUser(uInfo entity.UserInfo) error {
-	if !uInfo.Name.Valid() {
+	if !uInfo.ID.Valid() {
 		return errors.ErrInvalidUsername
 	}
 
@@ -21,8 +21,8 @@ func RegisterUser(uInfo entity.UserInfo) error {
 	}
 	err := entity.GetAllUsersRegistered().Add(u)
 	return err
-}
-
+} */
+/*
 func LogIn(name Username, auth Auth) error {
 	u := name.RefInAllUsers()
 	if u == nil {
@@ -35,15 +35,15 @@ func LogIn(name Username, auth Auth) error {
 		return errors.ErrLoginedUserAuthority
 	}
 
-	if verified := u.Auth.Verify(auth); !verified {
+	if verified := u.Secret.Verify(auth); !verified {
 		return errors.ErrFailedAuth
 	}
 
 	loginedUser = name
 
 	return nil
-}
-
+} */
+/*
 // LogOut log out User's own (current working) account
 // TODO:
 func LogOut(name Username) error {
@@ -62,7 +62,7 @@ func LogOut(name Username) error {
 	}
 	loginedUser = ""
 	return err
-}
+} */
 
 // QueryAccountAll queries all accounts
 func QueryAccountAll() []UserInfoPublic {
@@ -72,6 +72,7 @@ func QueryAccountAll() []UserInfoPublic {
 	return ret
 }
 
+/*
 // CancelAccount cancels(deletes) LoginedUser's account
 func CancelAccount() error {
 	u := LoginedUser()
@@ -80,10 +81,10 @@ func CancelAccount() error {
 	}
 
 	if err := entity.GetAllMeetings().ForEach(func(m *Meeting) error {
-		if m.SponsoredBy(u.Name) {
+		if m.SponsoredBy(u.ID) {
 			return m.Dissolve()
 		}
-		if m.ContainsParticipator(u.Name) {
+		if m.ContainsParticipator(u.ID) {
 			return m.Exclude(u)
 		}
 		return nil
@@ -100,7 +101,7 @@ func CancelAccount() error {
 
 	err := u.CancelAccount()
 	return err
-}
+} */
 
 // ----------------------------------------------------------------
 // @@binly: new
