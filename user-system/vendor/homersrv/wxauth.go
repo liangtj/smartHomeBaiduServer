@@ -11,8 +11,9 @@ var (
 )
 
 const (
-	homerAppID         = "wxa74f1ddc110ca088"
-	homerAppSecret     = "c0c5cb53426471ce5c6620d0f439c2c9"
+	homerAppID     = "wxa74f1ddc110ca088"
+	homerAppSecret = "c0c5cb53426471ce5c6620d0f439c2c9"
+
 	wxappAuthGrantType = "authorization_code"
 )
 
@@ -68,8 +69,9 @@ func WxLoginTokenAuth(code string) (WxauthResponse, error) {
 	if ret.ErrCode != 0 && ret.ErrMsg != "" {
 		return Result{}, fmt.Errorf(" - error, errcode: %v, errmsg: %v", ret.ErrCode, ret.ErrMsg)
 	}
-	if ret.UnionID == "" {
-		return ret, fmt.Errorf(" - error, 不满足UnionID下发条件的情况")
-	}
+	/* CHECK: not sure whether should do like this
+	    if ret.UnionID == "" {
+			return ret, fmt.Errorf(" - error, 不满足UnionID下发条件的情况")
+		} */
 	return ret, nil
 }
