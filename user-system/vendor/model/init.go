@@ -15,7 +15,7 @@ var userDB *gorm.DB
 
 func init() {
 	// db, err := gorm.Open("mysql", "root:root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local")  // from gorm's doc
-	db, err := gorm.Open("sqlite3", config.WorkingDir()+"agenda.db")
+	db, err := gorm.Open("sqlite3", config.WorkingDir()+"wxapp.db")
 	util.PanicIf(err)
 	userDB = db
 }

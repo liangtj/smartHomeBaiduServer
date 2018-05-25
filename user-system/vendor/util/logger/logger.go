@@ -20,7 +20,7 @@ func init() {
 	}
 	// logWriter := io.MultiWriter(flog, os.Stderr)
 
-	Logger = log.New(logWriter, "cloudgo: ", log.LstdFlags|log.Lshortfile)
+	Logger = log.New(logWriter, "app: ", log.LstdFlags|log.Lshortfile)
 }
 
 func init() {

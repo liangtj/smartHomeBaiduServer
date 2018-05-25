@@ -2,7 +2,7 @@ package entity
 
 import (
 	"convention/codec"
-	"convention/homererror"
+	"convention/errors"
 	"io"
 	"time"
 	log "util/logger"
@@ -33,15 +33,15 @@ type MeetingInfo struct {
 }
 type MeetingInfoSerializable struct {
 	Title         MeetingTitle
-	Sponsor       Username
-	Participators []Username
+	Sponsor       UserIdentifier
+	Participators []UserIdentifier
 	StartTime     string
 	EndTime       string
 }
 
 type MeetingInfoForDatabase struct {
 	Title         MeetingTitle `gorm:"primary_key"`
-	Sponsor       Username
+	Sponsor       UserIdentifier
 	Participators []UserInfoSerializable `gorm:"many2many:participations;"`
 	// Participators []UserInfoSerializable `gorm:"many2many:meetingInfoForDataBase_userInfoSerializables;"`
 
@@ -240,33 +240,33 @@ func (ml *MeetingList) Contains(title MeetingTitle) bool {
 
 func (ml *MeetingList) Add(meeting *Meeting) error {
 	if meeting == nil {
-		return homererror.ErrNilMeeting
+		return errors.ErrNilMeeting
 	}
 	title := meeting.Title
 	if ml.Contains(title) {
-		return homererror.ErrExistedMeeting
+		return errors.ErrExistedMeeting
 	}
 	ml.Meetings[title] = meeting
 	return nil
 }
 func (ml *MeetingList) Remove(meeting *Meeting) error {
 	if meeting == nil {
-		return homererror.ErrNilMeeting
+		return errors.ErrNilMeeting
 	}
 	title := meeting.Title
 	if ml.Contains(title) {
 		delete(ml.Meetings, title) // NOTE: never error, according to 'go-maps-in-action'
 		return nil
 	}
-	return homererror.ErrMeetingNotFound
+	return errors.ErrMeetingNotFound
 }
 func (ml *MeetingList) PickOut(title MeetingTitle) (*Meeting, error) {
 	if title.Empty() {
-		return nil, homererror.ErrEmptyMeetingTitle
+		return nil, errors.ErrEmptyMeetingTitle
 	}
 	m := ml.Ref(title)
 	if m == nil {
-		return nil, homererror.ErrMeetingNotFound
+		return nil, errors.ErrMeetingNotFound
 	}
 	defer ml.Remove(m)
 	return m, nil

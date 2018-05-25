@@ -2,18 +2,18 @@ package main
 
 import (
 	"flag"
-	"homersrv"
 	"os"
 	"os/signal"
 	"syscall"
 	log "util/logger"
+	"wxappsrv"
 )
 
 // var logln = util.Log
 // var logf = util.Logf
 
 const (
-	DefaultPort = homersrv.DefaultPort
+	DefaultPort = wxappsrv.DefaultPort
 )
 
 var (
@@ -22,25 +22,25 @@ var (
 )
 
 func init() {
-	flag.StringVar(&port, "p", DefaultPort, "The PORT to be listened by agenda.")
+	flag.StringVar(&port, "p", DefaultPort, "The PORT to be listened by wxapp.")
 }
 
 func main() {
 	flag.Parse()
 	// TODO: validate port ?
 
-	homersrv.LoadAll()
-	defer homersrv.SaveAll()
+	wxappsrv.LoadAll()
+	defer wxappsrv.SaveAll()
 
 	go func() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 		log.Infof("Signal %v", <-c)
-		homersrv.SaveAll()
+		wxappsrv.SaveAll()
 		os.Exit(0)
 	}()
 
-	err := homersrv.Listen(":" + port)
+	err := wxappsrv.Listen(":" + port)
 	if err != nil {
 		log.Fatal(err)
 	}

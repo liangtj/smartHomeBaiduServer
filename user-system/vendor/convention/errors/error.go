@@ -1,4 +1,4 @@
-package homererror
+package errors
 
 import "errors"
 
@@ -44,16 +44,16 @@ var (
 	ErrGivenConflictedInfo = errors.New("given a not reasonable information")
 )
 
-type AgendaError struct {
+type WxappError struct {
 	msg string
 }
 
-func NewAgendaError(msg string) *AgendaError {
-	return &AgendaError{
+func NewWxappError(msg string) *WxappError {
+	return &WxappError{
 		msg: msg,
 	}
 }
 
-func (e *AgendaError) Error() string {
+func (e *WxappError) Error() string {
 	return e.msg
 }

@@ -3,7 +3,7 @@ package entity
 import (
 	"auth"
 	"convention/codec"
-	"convention/homererror"
+	"convention/errors"
 	"io"
 	log "util/logger"
 )
@@ -11,28 +11,27 @@ import (
 // var logln = util.Log
 // var logf = util.Logf
 
-// Username represents username, a unique identifier, of User
-// Identifier
-type Username string
+// UserIdentifier represents username, a unique identifier, of User
+type UserIdentifier string
 
-// Empty checks if Username empty
-func (name Username) Empty() bool {
-	return name == ""
+// Empty checks if UserIdentifier empty
+func (uid UserIdentifier) Empty() bool {
+	return uid == ""
 }
 
-// Valid checks if Username valid
-func (name Username) Valid() bool {
-	return !name.Empty() // NOTE: may not only !empty
+// Valid checks if UserIdentifier valid
+func (uid UserIdentifier) Valid() bool {
+	return !uid.Empty() // NOTE: may not only !empty
 }
 
-func (name Username) String() string {
-	return string(name)
+func (uid UserIdentifier) String() string {
+	return string(uid)
 }
 
 type UserInfoPublic struct {
-	ID Username `gorm:"primary_key" json:"username"`
+	ID UserIdentifier `gorm:"primary_key" json:"userid"`
 
-	HomeAssistantAddr string `json:"mail"`
+	HomeAssistantAddr string `json:"homeAssistantAddr"`
 	Phone             string `json:"phone"`
 }
 
@@ -88,7 +87,7 @@ func (u *User) Save(encoder codec.Encoder) error {
 
 // UserList represents a list/group of User (of the form of pointers of Users)
 type UserList struct {
-	Users map[Username](*User)
+	Users map[UserIdentifier](*User)
 }
 
 // UserListRaw also represents a list of User, but it is more trivial and more simple, i.e. it basically is ONLY a list of User, besides this, nothing
@@ -140,7 +139,7 @@ func (ulSerial UserInfoSerializableList) Deserialize() *UserList {
 // NewUserList creates a UserList object
 func NewUserList() *UserList {
 	ul := new(UserList)
-	ul.Users = make(map[Username](*User))
+	ul.Users = make(map[UserIdentifier](*User))
 	return ul
 }
 
@@ -168,9 +167,9 @@ func LoadUserList(decoder codec.Decoder, ul *UserList) {
 	}
 }
 
-// InitFrom loads UserList in-place from given []Username; Just like `init`
+// InitFrom loads UserList in-place from given []UserIdentifier; Just like `init`
 // CHECK: Not sure whether need/should return error
-func (ul *UserList) InitFrom(li []Username) error {
+func (ul *UserList) InitFrom(li []UserIdentifier) error {
 	// clear ...
 	ul.Users = NewUserList().Users
 
@@ -196,8 +195,8 @@ func LoadedUserList(decoder codec.Decoder) *UserList {
 	return ul
 }
 
-func (ul *UserList) Identifiers() []Username {
-	ret := make([]Username, 0, ul.Size())
+func (ul *UserList) Identifiers() []UserIdentifier {
+	ret := make([]UserIdentifier, 0, ul.Size())
 	for _, u := range ul.PublicInfos() {
 		ret = append(ret, u.ID)
 	}
@@ -230,12 +229,12 @@ func (ul *UserList) Size() int {
 }
 
 // Ref just returns the reference of user with the given name
-func (ul *UserList) Ref(name Username) *User {
+func (ul *UserList) Ref(name UserIdentifier) *User {
 	return ul.Users[name] // NOTE: if directly return accessed result from a map like this, would not get the (automatical) `ok`
 }
 
 // Contains just check if contains
-func (ul *UserList) Contains(name Username) bool {
+func (ul *UserList) Contains(name UserIdentifier) bool {
 	u := ul.Ref(name)
 	return u != nil
 }
@@ -243,11 +242,11 @@ func (ul *UserList) Contains(name Username) bool {
 // Add just add
 func (ul *UserList) Add(user *User) error {
 	if user == nil {
-		return homererror.ErrNilUser
+		return errors.ErrNilUser
 	}
 	name := user.ID
 	if ul.Contains(name) {
-		return homererror.ErrExistedUser
+		return errors.ErrExistedUser
 	}
 	ul.Users[name] = user
 	return nil
@@ -256,31 +255,31 @@ func (ul *UserList) Add(user *User) error {
 // Remove just remove
 func (ul *UserList) Remove(user *User) error {
 	if user == nil {
-		return homererror.ErrNilUser
+		return errors.ErrNilUser
 	}
 	name := user.ID
 	if ul.Contains(name) {
 		delete(ul.Users, name) // NOTE: never error, according to 'go-maps-in-action'
 		return nil
 	}
-	return homererror.ErrUserNotFound
+	return errors.ErrUserNotFound
 }
 
 // PickOut =~= Ref and then Remove
-func (ul *UserList) PickOut(name Username) (*User, error) {
+func (ul *UserList) PickOut(name UserIdentifier) (*User, error) {
 	if name.Empty() {
-		return nil, homererror.ErrEmptyUsername
+		return nil, errors.ErrEmptyUsername
 	}
 	u := ul.Ref(name)
 	if u == nil {
-		return u, homererror.ErrUserNotFound
+		return u, errors.ErrUserNotFound
 	}
 	defer ul.Remove(u)
 	return u, nil
 }
 
 // Slice returns a UserListRaw based on UserList ul
-// NOTE: for the need of this simple agenda system, this seems somewhat needless
+// NOTE: for the need of this simple wxapp system, this seems somewhat needless
 func (ul *UserList) Slice() UserListRaw {
 	users := make(UserListRaw, 0, ul.Size())
 	for _, u := range ul.Users {

@@ -1,4 +1,4 @@
-package homersrv
+package wxappsrv
 
 import (
 	"encoding/json"
@@ -11,8 +11,8 @@ var (
 )
 
 const (
-	homerAppID     = "wxa74f1ddc110ca088"
-	homerAppSecret = "c0c5cb53426471ce5c6620d0f439c2c9"
+	AppID     = "wxa74f1ddc110ca088"
+	AppSecret = "c0c5cb53426471ce5c6620d0f439c2c9"
 
 	wxappAuthGrantType = "authorization_code"
 )
@@ -47,8 +47,8 @@ func WxLoginTokenAuth(code string) (WxauthResponse, error) {
 	}
 	// req.Header.Set("Content-Type", "application/json")
 	q := req.URL.Query()
-	q.Add("appid", homerAppID)
-	q.Add("secret", homerAppSecret)
+	q.Add("appid", AppID)
+	q.Add("secret", AppSecret)
 	q.Add("js_code", code)
 	q.Add("grant_type", wxappAuthGrantType)
 	req.URL.RawQuery = q.Encode()

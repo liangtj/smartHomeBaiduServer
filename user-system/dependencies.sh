@@ -7,3 +7,4 @@ go get -u github.com/micro/go-micro
 
 go get github.com/gin-gonic/gin
 go get github.com/gin-contrib/sessions
+go get github.com/alexedwards/scs

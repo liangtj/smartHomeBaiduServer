@@ -7,8 +7,8 @@ import (
 	"entity"
 	"os"
 	"sync"
-	agendaLogger "util/logger"
 	log "util/logger"
+	wxappLogger "util/logger"
 )
 
 var wg sync.WaitGroup
@@ -20,34 +20,34 @@ func backupOldFiles() {
 	}
 }
 
-// Load : load all resources for agenda.
+// Load : load all resources for wxapp.
 func Load() {
 	loadConfig()
 	loadAllUser()
 	loadAllMeeting()
 }
 
-// Save : Save all data for agenda.
+// Save : Save all data for wxapp.
 func Save() error {
 	if err := saveAllUser(); err != nil {
-		agendaLogger.Println(err.Error())
+		wxappLogger.Println(err.Error())
 		return err
 	}
 	if err := saveAllMeeting(); err != nil {
-		agendaLogger.Println(err.Error())
+		wxappLogger.Println(err.Error())
 		return err
 	}
 	if err := saveConfig(); err != nil {
-		agendaLogger.Println(err.Error())
+		wxappLogger.Println(err.Error())
 		return err
 	}
 	return nil
 }
 
 func loadConfig() {
-	fcfg, err := os.Open(config.AgendaConfigPath())
+	fcfg, err := os.Open(config.WxappConfigPath())
 	if err != nil {
-		log.Fatalf("Load config fail, for config path: %v\n", config.AgendaConfigPath())
+		log.Fatalf("Load config fail, for config path: %v\n", config.WxappConfigPath())
 	}
 
 	if info, err := fcfg.Stat(); err != nil {
@@ -60,9 +60,9 @@ func loadConfig() {
 	config.Load(decoder)
 }
 func saveConfig() error {
-	fcfg, err := os.Create(config.AgendaConfigPath())
+	fcfg, err := os.Create(config.WxappConfigPath())
 	if err != nil {
-		log.Fatalf("Save config fail, for config path: %v\n", config.AgendaConfigPath())
+		log.Fatalf("Save config fail, for config path: %v\n", config.WxappConfigPath())
 	}
 
 	encoder := json.NewEncoder(fcfg)
