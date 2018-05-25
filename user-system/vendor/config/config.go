@@ -16,7 +16,7 @@ func LogToConsoleMode() bool { return logToConsoleMode }
 
 // type Config = map[string](interface{})
 
-// Config holds all configure of Agenda system.
+// Config holds all configure of Wxapp system.
 var Config = make(map[string](interface{}))
 
 func Load(decoder codec.Decoder) {
@@ -39,13 +39,13 @@ func Save(encoder codec.Encoder) error {
 
 // ... paths
 
-// WorkingDir for agenda.
+// WorkingDir for wxapp.
 func WorkingDir() string {
 	location, existed := os.LookupEnv("HOME")
 	if !existed || DebugMode() {
 		location = "."
 	}
-	ret := location + "/.agenda.d/"
+	ret := location + "/.wxapp.d/"
 	return ret
 }
 
@@ -63,7 +63,7 @@ func init() {
 var neededFilepaths = []string{
 	UserDataRegisteredPath(),
 	MeetingDataPath(),
-	AgendaConfigPath(),
+	WxappConfigPath(),
 	UserLoginStatusPath(),
 }
 
@@ -74,10 +74,10 @@ func NeededFilepaths() []string {
 func UserDataRegisteredPath() string { return WorkingDir() + "user-registered.json" }
 func MeetingDataPath() string        { return WorkingDir() + "meeting-data.json" }
 
-func AgendaConfigPath() string { return WorkingDir() + "config.json" }
+func WxappConfigPath() string { return WorkingDir() + "config.json" }
 
-// func LogPath() string             { return WorkingDir() + "agenda_" + time.Now().Format("20060102_0304") + ".log" }
-func LogPath() string             { return WorkingDir() + "agenda_" + time.Now().Format("20060102_15") + ".log" }
+// func LogPath() string             { return WorkingDir() + "wxapp_" + time.Now().Format("20060102_0304") + ".log" }
+func LogPath() string             { return WorkingDir() + "wxapp_" + time.Now().Format("20060102_15") + ".log" }
 func UserLoginStatusPath() string { return WorkingDir() + "curUser.txt" }
 
 func BackupDir() string {

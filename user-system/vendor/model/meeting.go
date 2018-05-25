@@ -16,7 +16,7 @@ func init() {
 
 		// FIXME: wanted to model many2many relation, however, only without so the codes could work .....
 		// u := &entity.UserInfoSerializable{}
-		// err = agendaDB.Model(m).Related(u, "participations").Error
+		// err = wxappDB.Model(m).Related(u, "participations").Error
 		util.PanicIf(err)
 
 		log.Infof("\n ...... CreateTable %T. \n", m)

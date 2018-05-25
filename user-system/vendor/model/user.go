@@ -74,10 +74,10 @@ func (*UserInfoAtomicService) FindAll() ([]entity.UserInfoSerializable, error) {
 }
 
 // FindByUsername .
-func (*UserInfoAtomicService) FindByUsername(name entity.Username) (entity.UserInfoSerializable, error) {
+func (*UserInfoAtomicService) FindByUsername(name entity.UserIdentifier) (entity.UserInfoSerializable, error) {
 	var uInfo entity.UserInfoSerializable
 
-	// agendaDB.First(&uInfo, entity.UserInfoSerializable{Name: name}) // TODEL: sad to anonymous member ...
+	// wxappDB.First(&uInfo, entity.UserInfoSerializable{Name: name}) // TODEL: sad to anonymous member ...
 	u := entity.UserInfoSerializable{}
 	u.ID = name
 	err := userDB.First(&uInfo, u).Error

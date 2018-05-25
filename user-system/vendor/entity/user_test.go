@@ -6,7 +6,7 @@ func TestUsername_Valid(t *testing.T) {
 	// n := Username("dd")
 	tests := []struct {
 		name string
-		n    Username
+		n    UserIdentifier
 		want bool
 	}{
 		// TODO: Add test cases.
